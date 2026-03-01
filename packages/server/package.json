@@ -2,6 +2,7 @@
   "name": "@acme/server",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "predev": "pnpm -C ../types build && pnpm -C ../i18n build",
@@ -28,11 +29,8 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@swc-node/register": "^1.11.1",
-    "@swc/core": "^1.15.18",
     "@types/node": "^25.3.3",
     "@types/pg": "^8.18.0",
-    "chokidar": "^5.0.0",
     "concurrently": "^9.2.1",
     "drizzle-kit": "^0.31.9",
     "ts-morph": "^27.0.2",

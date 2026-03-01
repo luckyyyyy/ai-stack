@@ -4,7 +4,7 @@ import type {
   AnyRouter,
 } from "@trpc/server";
 import { initTRPC } from "@trpc/server";
-import { Logger } from "../logger";
+import { Logger } from "@/logger";
 import type { Context } from "./context";
 import {
   getCtxMeta,

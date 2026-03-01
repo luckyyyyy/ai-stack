@@ -5,15 +5,15 @@ import {
   WorkspaceSchema,
 } from "@acme/types";
 import { z } from "zod";
-import type { AuthContext } from "../../trpc/context";
+import type { AuthContext } from "@/trpc/context";
 import {
   Ctx,
   Mutation,
   Query,
   Router,
   UseMiddlewares,
-} from "../../trpc/decorators";
-import { requireUser } from "../../trpc/middlewares";
+} from "@/trpc/decorators";
+import { requireUser } from "@/trpc/middlewares";
 import { toWorkspaceOutput, workspaceService } from "./workspace.service";
 
 @Router({ alias: "workspace" })

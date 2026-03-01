@@ -1,11 +1,11 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "baseUrl": ".",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "paths": {
-      "@/*": ["src/*"]
+      "*": ["./*"],
+      "@/*": ["./src/*"]
     },
     "rootDir": "src",
     "outDir": "dist",

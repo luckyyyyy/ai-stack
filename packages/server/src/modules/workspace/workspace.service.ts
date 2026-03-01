@@ -1,9 +1,9 @@
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
-import { db } from "../../db/client";
-import { workspaceMembers, workspaces } from "../../db/schema";
-import { getMessage, type Language } from "../../i18n";
-import { slugify } from "../../utils/slugify";
+import { db } from "@/db/client";
+import { workspaceMembers, workspaces } from "@/db/schema";
+import { getMessage, type Language } from "@/i18n";
+import { slugify } from "@/utils/slugify";
 
 export const toWorkspaceOutput = (
   dbWorkspace: typeof workspaces.$inferSelect,

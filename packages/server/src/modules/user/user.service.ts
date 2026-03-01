@@ -1,9 +1,9 @@
 import type { UserSettings } from "@acme/types";
 import { TRPCError } from "@trpc/server";
 import { and, eq, ne } from "drizzle-orm";
-import { db } from "../../db/client";
-import { users } from "../../db/schema";
-import { getMessage, type Language } from "../../i18n";
+import { db } from "@/db/client";
+import { users } from "@/db/schema";
+import { getMessage, type Language } from "@/i18n";
 
 export const toUserOutput = (user: typeof users.$inferSelect) => ({
   id: user.id,

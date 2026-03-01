@@ -1,9 +1,9 @@
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { db } from "../../db/client";
-import { sessions, users, workspaceMembers, workspaces } from "../../db/schema";
-import { SESSION_COOKIE_NAME } from "../../utils/session";
-import { slugify } from "../../utils/slugify";
+import { db } from "@/db/client";
+import { sessions, users, workspaceMembers, workspaces } from "@/db/schema";
+import { SESSION_COOKIE_NAME } from "@/utils/session";
+import { slugify } from "@/utils/slugify";
 
 const hashPassword = (password: string): string => {
   const salt = randomBytes(16).toString("hex");

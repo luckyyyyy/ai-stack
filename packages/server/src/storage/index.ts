@@ -4,7 +4,7 @@
  * To swap providers, change STORAGE_PROVIDER and the corresponding
  * STORAGE_* variables; no application code needs to change.
  */
-import { Logger } from "../logger";
+import { Logger } from "@/logger";
 import type { StorageProvider } from "./provider";
 import { S3StorageProvider } from "./s3.provider";
 

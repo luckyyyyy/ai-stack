@@ -1,8 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import type { MiddlewareResult } from "@trpc/server/unstable-core-do-not-import";
 import { and, eq, or } from "drizzle-orm";
-import { workspaceMembers, workspaces } from "../db/schema";
-import { getMessage } from "../i18n";
+import { workspaceMembers, workspaces } from "@/db/schema";
+import { getMessage } from "@/i18n";
 import type { Context } from "./context";
 
 export const requireUser = async ({

@@ -3,8 +3,8 @@
  * Used by tRPC context, upload routes, and auth service to avoid duplication.
  */
 import { and, eq, gt } from "drizzle-orm";
-import { db } from "../db/client";
-import { sessions } from "../db/schema";
+import { db } from "@/db/client";
+import { sessions } from "@/db/schema";
 
 export const SESSION_COOKIE_NAME = "SESSION_ID";
 

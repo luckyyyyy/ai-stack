@@ -1,16 +1,16 @@
 import { UserProfileOutputSchema, UserUpdateInputSchema } from "@acme/types";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { getMessage } from "../../i18n";
-import type { AuthContext } from "../../trpc/context";
+import { getMessage } from "@/i18n";
+import type { AuthContext } from "@/trpc/context";
 import {
   Ctx,
   Mutation,
   Query,
   Router,
   UseMiddlewares,
-} from "../../trpc/decorators";
-import { requireUser } from "../../trpc/middlewares";
+} from "@/trpc/decorators";
+import { requireUser } from "@/trpc/middlewares";
 import { toUserOutput, userService } from "./user.service";
 
 @Router({ alias: "user" })

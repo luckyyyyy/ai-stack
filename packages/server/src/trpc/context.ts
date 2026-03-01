@@ -1,9 +1,9 @@
 import type { InferSelectModel } from "drizzle-orm";
 import { and, eq, gt } from "drizzle-orm";
-import { db } from "../db/client";
-import { sessions, workspaces } from "../db/schema";
-import { normalizeLanguage } from "../i18n";
-import { getCookieValue, SESSION_COOKIE_NAME } from "../utils/session";
+import { db } from "@/db/client";
+import { sessions, workspaces } from "@/db/schema";
+import { normalizeLanguage } from "@/i18n";
+import { getCookieValue, SESSION_COOKIE_NAME } from "@/utils/session";
 
 type Workspace = InferSelectModel<typeof workspaces>;
 
