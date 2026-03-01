@@ -1,6 +1,6 @@
 import type { User } from "@acme/types";
 import { Outlet } from "react-router-dom";
-import type { Lang, LangMode, Theme, ThemeMode } from "../../lib/types";
+import type { Lang, LangMode, Theme, ThemeMode } from "@/lib/types";
 import SiteHeader from "./SiteHeader";
 
 type SiteLayoutProps = {

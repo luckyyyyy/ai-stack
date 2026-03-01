@@ -1,10 +1,10 @@
 import type { User } from "@acme/types";
 import { useState } from "react";
 import { Navigate, Outlet, useNavigate, useParams } from "react-router-dom";
-import { trpc } from "../../lib/trpc";
-import type { Lang } from "../../lib/types";
-import { UserMenu } from "../account";
-import { WorkspaceRedirectSkeleton } from "../skeleton";
+import { UserMenu } from "@/components/account";
+import { WorkspaceRedirectSkeleton } from "@/components/skeleton";
+import { trpc } from "@/lib/trpc";
+import type { Lang } from "@/lib/types";
 import CreateWorkspaceModal from "./CreateWorkspaceModal";
 import { WorkspaceContext } from "./WorkspaceContext";
 import WorkspaceSwitcher from "./WorkspaceSwitcher";

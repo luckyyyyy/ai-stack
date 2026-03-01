@@ -50,3 +50,7 @@ prisma/dev.db-journal
 
 # Server
 packages/server/src/trpc/@generated/app-router.ts
+packages/server/src/**/*.js
+packages/server/src/**/*.js.map
+packages/server/src/**/*.d.ts
+packages/server/src/**/*.d.ts.map

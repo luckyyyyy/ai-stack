@@ -118,15 +118,15 @@ packages/
   - Server: http://localhost:4000
   - Web: http://localhost:5173
 - **Build for production**: `pnpm build`
-- **Lint/Format**: `pnpm lint` (Biome check) or `pnpm format` (auto-fix)
-- **Type check**: `pnpm typecheck` (runs `tsc --noEmit` across all packages in parallel)
-- **Full CI check**: `pnpm check` (runs lint + typecheck together — **must pass before committing**)
+- **Lint/Format**: `make lint` (Biome check) or `pnpm format` (auto-fix)
+- **Type check**: `make tsc` (runs `tsc --noEmit` across all packages in parallel)
+- **Full CI check**: `make lint && make tsc` (must pass before committing)
 - **Database**:
   - Start: `pnpm db:up` (Docker Compose)
   - Stop: `pnpm db:down`
   - Migrate: `pnpm db:migrate`
 
-> **强制要求**：每次提交代码前必须确保 `pnpm check`（即 `pnpm lint && pnpm typecheck`）无报错。
+> **强制要求**：每次提交代码前必须确保 `make lint && make tsc` 无报错。
 > **注意**：只需修复**本次改动引入的** tsc / lint 错误；非本次修改造成的已有错误无需处理。
 
 ## Architecture Patterns
@@ -487,6 +487,6 @@ Before committing a new feature:
 - ✅ `@UseMiddlewares(requireUser)` on protected routes
 - ✅ Frontend components use tRPC hooks
 - ✅ Run `pnpm db:migrate` after schema changes
-- ✅ **Lint passes**: `pnpm lint` — no errors introduced by this change
-- ✅ **TypeScript passes**: `pnpm typecheck` — no errors introduced by this change
-- ✅ **Full check**: `pnpm check` — must be clean before every commit (pre-existing errors unrelated to this change can be ignored)
+- ✅ **Lint passes**: `make lint` — no errors introduced by this change
+- ✅ **TypeScript passes**: `make tsc` — no errors introduced by this change
+- ✅ **Full check**: `make lint && make tsc` — must be clean before every commit (pre-existing errors unrelated to this change can be ignored)

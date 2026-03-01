@@ -1,7 +1,7 @@
 import type { User } from "@acme/types";
 import { Link } from "react-router-dom";
-import type { Lang, LangMode, ThemeMode } from "../../lib/types";
-import { UserMenu } from "../account";
+import { UserMenu } from "@/components/account";
+import type { Lang, LangMode, ThemeMode } from "@/lib/types";
 
 type SiteHeaderProps = {
   user: User | null;

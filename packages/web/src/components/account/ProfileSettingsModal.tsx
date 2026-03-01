@@ -1,9 +1,9 @@
 import { Avatar, Button, Input, Modal, Select } from "@acme/components";
 import type { User } from "@acme/types";
 import { useEffect, useRef, useState } from "react";
-import { useMessage } from "../../hooks/useMessage";
-import { trpc } from "../../lib/trpc";
-import type { Lang } from "../../lib/types";
+import { useMessage } from "@/hooks/useMessage";
+import { trpc } from "@/lib/trpc";
+import type { Lang } from "@/lib/types";
 
 interface ProfileSettingsModalProps {
   open: boolean;

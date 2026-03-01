@@ -1,5 +1,5 @@
 import type { User } from "@acme/types";
-import { useWorkspace } from "../../components/dashboard/WorkspaceContext";
+import { useWorkspace } from "@/components/dashboard/WorkspaceContext";
 
 interface WorkspacePageProps {
   user: User | null;

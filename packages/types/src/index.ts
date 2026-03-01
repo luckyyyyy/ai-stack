@@ -1,23 +1,20 @@
 export type {
-  CreateTestRequirementInput,
-  DeleteTestRequirementInput,
-  TestRequirement,
-  TestRequirementListQuery,
-  TestRequirementPriority,
-  TestRequirementStatus,
-  TestRequirementType,
-  UpdateTestRequirementInput,
-} from "./test-requirement";
+  AuthOutput,
+  LoginInput,
+  LogoutOutput,
+  RegisterInput,
+  UserProfileOutput,
+  UserUpdateInput,
+} from "./api";
 export {
-  CreateTestRequirementInputSchema,
-  DeleteTestRequirementInputSchema,
-  TestRequirementListQuerySchema,
-  TestRequirementPrioritySchema,
-  TestRequirementSchema,
-  TestRequirementStatusSchema,
-  TestRequirementTypeSchema,
-  UpdateTestRequirementInputSchema,
-} from "./test-requirement";
+  AuthOutputSchema,
+  LoginInputSchema,
+  LogoutOutputSchema,
+  RegisterInputSchema,
+  UserProfileOutputSchema,
+  UserUpdateInputSchema,
+} from "./api";
+export type { AppRouter } from "./trpc/@generated/app-router";
 export type { User, UserSettings } from "./user";
 export {
   UserSchema,

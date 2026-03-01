@@ -2,7 +2,7 @@ import { Button, Input } from "@acme/components";
 import type { User } from "@acme/types";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { trpc } from "../../lib/trpc";
+import { trpc } from "@/lib/trpc";
 
 type LoginPageProps = {
   onLogin: (user: User) => void;

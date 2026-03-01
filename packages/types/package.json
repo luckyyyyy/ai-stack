@@ -20,6 +20,7 @@
     "prepare": "pnpm build"
   },
   "dependencies": {
+    "@trpc/server": "^11.11.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {

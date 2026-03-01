@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { WorkspaceRedirectSkeleton } from "../../components/skeleton";
-import { trpc } from "../../lib/trpc";
+import { WorkspaceRedirectSkeleton } from "@/components/skeleton";
+import { trpc } from "@/lib/trpc";
 
 export default function DashboardIndexRedirect() {
   const navigate = useNavigate();

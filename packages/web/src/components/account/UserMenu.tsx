@@ -6,7 +6,7 @@ import {
 } from "@acme/components";
 import type { User } from "@acme/types";
 import { useState } from "react";
-import type { Lang } from "../../lib/types";
+import type { Lang } from "@/lib/types";
 import ProfileSettingsModal from "./ProfileSettingsModal";
 
 type UserMenuProps = {

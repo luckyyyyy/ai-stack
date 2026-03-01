@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
-import {
-  detectSystemTheme,
-  loadThemeMode,
-  saveThemeMode,
-} from "../lib/storage";
-import type { Theme, ThemeMode } from "../lib/types";
+import { detectSystemTheme, loadThemeMode, saveThemeMode } from "@/lib/storage";
+import type { Theme, ThemeMode } from "@/lib/types";
 
 export function useTheme() {
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => loadThemeMode());

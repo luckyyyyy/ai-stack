@@ -1,4 +1,4 @@
-import { UserSchema, UserSettingsPatchSchema } from "@acme/types";
+import { UserProfileOutputSchema, UserUpdateInputSchema } from "@acme/types";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getMessage } from "../../i18n";
@@ -13,17 +13,9 @@ import {
 import { requireUser } from "../../trpc/middlewares";
 import { toUserOutput, userService } from "./user.service";
 
-export const userProfileOutput = UserSchema;
-
-export const userUpdateInput = z.object({
-  name: z.string().min(1).optional(),
-  email: z.string().email().optional(),
-  settings: UserSettingsPatchSchema.nullable().optional(),
-});
-
 @Router({ alias: "user" })
 export class UserRouter {
-  @Query({ output: userProfileOutput })
+  @Query({ output: UserProfileOutputSchema })
   @UseMiddlewares(requireUser)
   async getProfile(@Ctx() ctx: AuthContext) {
     const user = await userService.getById(ctx.userId);
@@ -36,10 +28,10 @@ export class UserRouter {
     return toUserOutput(user);
   }
 
-  @Mutation({ input: userUpdateInput, output: userProfileOutput })
+  @Mutation({ input: UserUpdateInputSchema, output: UserProfileOutputSchema })
   @UseMiddlewares(requireUser)
   async updateProfile(
-    input: z.infer<typeof userUpdateInput>,
+    input: z.infer<typeof UserUpdateInputSchema>,
     @Ctx() ctx: AuthContext,
   ) {
     const updated = await userService.updateProfile(
@@ -54,7 +46,7 @@ export class UserRouter {
     return toUserOutput(updated);
   }
 
-  @Mutation({ output: userProfileOutput })
+  @Mutation({ output: UserProfileOutputSchema })
   @UseMiddlewares(requireUser)
   async deleteAvatar(@Ctx() ctx: AuthContext) {
     const updated = await userService.deleteAvatar(ctx.userId, ctx.language);

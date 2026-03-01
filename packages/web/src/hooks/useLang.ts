@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { loadLangMode, saveLangMode } from "../lib/storage";
-import type { Lang, LangMode } from "../lib/types";
+import { loadLangMode, saveLangMode } from "@/lib/storage";
+import type { Lang, LangMode } from "@/lib/types";
 
 const normalizeLang = (value?: string): Lang =>
   value?.toLowerCase().startsWith("zh") ? "zh" : "en";

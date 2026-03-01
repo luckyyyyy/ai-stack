@@ -1,4 +1,9 @@
-import { UserSchema } from "@acme/types";
+import {
+  AuthOutputSchema,
+  LoginInputSchema,
+  LogoutOutputSchema,
+  RegisterInputSchema,
+} from "@acme/types";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getMessage } from "../../i18n";
@@ -7,31 +12,10 @@ import { Ctx, Mutation, Router } from "../../trpc/decorators";
 import { toUserOutput } from "../user/user.service";
 import { authService, verifyPassword } from "./auth.service";
 
-export const loginInput = z.object({
-  email: z.string().email(),
-  password: z.string().min(4),
-});
-
-export const registerInput = z.object({
-  email: z.string().email(),
-  password: z.string().min(4),
-});
-
-export const userOutput = UserSchema;
-
-export const authOutput = z.object({
-  user: userOutput,
-  defaultWorkspaceSlug: z.string(),
-});
-
-export const logoutOutput = z.object({
-  success: z.boolean(),
-});
-
 @Router({ alias: "auth" })
 export class AuthRouter {
-  @Mutation({ input: loginInput, output: authOutput })
-  async login(input: z.infer<typeof loginInput>, @Ctx() ctx: Context) {
+  @Mutation({ input: LoginInputSchema, output: AuthOutputSchema })
+  async login(input: z.infer<typeof LoginInputSchema>, @Ctx() ctx: Context) {
     const user = await authService.getUserByEmail(input.email);
 
     if (!user || !verifyPassword(input.password, user.passwordHash)) {
@@ -64,8 +48,11 @@ export class AuthRouter {
     };
   }
 
-  @Mutation({ input: registerInput, output: authOutput })
-  async register(input: z.infer<typeof registerInput>, @Ctx() ctx: Context) {
+  @Mutation({ input: RegisterInputSchema, output: AuthOutputSchema })
+  async register(
+    input: z.infer<typeof RegisterInputSchema>,
+    @Ctx() ctx: Context,
+  ) {
     const existing = await authService.getUserByEmail(input.email);
     if (existing) {
       throw new TRPCError({
@@ -86,7 +73,7 @@ export class AuthRouter {
     };
   }
 
-  @Mutation({ output: logoutOutput })
+  @Mutation({ output: LogoutOutputSchema })
   async logout(@Ctx() ctx: Context) {
     if (ctx.sessionId) {
       await authService.deleteSession(ctx.sessionId);
@@ -95,7 +82,7 @@ export class AuthRouter {
     return { success: true };
   }
 
-  @Mutation({ output: authOutput })
+  @Mutation({ output: AuthOutputSchema })
   async devLogin(@Ctx() ctx: Context) {
     if (process.env.NODE_ENV === "production") {
       throw new TRPCError({ code: "FORBIDDEN", message: "仅在开发环境可用" });

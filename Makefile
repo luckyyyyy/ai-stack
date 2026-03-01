@@ -1,4 +1,4 @@
-.PHONY: init dev build docker help
+.PHONY: init dev build docker tsc lint help
 
 # 读取环境变量（如果存在）
 -include .env
@@ -127,3 +127,9 @@ docker: ## 构建 Docker 容器
 	@docker build -f packages/server/Dockerfile -t $(SERVER_IMAGE):latest .
 	@docker build -f packages/web/Dockerfile -t $(WEB_IMAGE):latest .
 	@printf "$(GREEN)✓ 镜像构建完成$(NC)\n"
+
+tsc: ## TypeScript 类型检查（所有包）
+	@pnpm -r exec tsc --noEmit
+
+lint: ## Biome lint 检查（所有包）
+	@pnpm exec biome check .

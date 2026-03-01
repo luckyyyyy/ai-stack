@@ -1,8 +1,8 @@
 import { Button, Input, Modal } from "@acme/components";
 import { useEffect, useState } from "react";
-import { useMessage } from "../../hooks/useMessage";
-import { trpc } from "../../lib/trpc";
-import type { Lang } from "../../lib/types";
+import { useMessage } from "@/hooks/useMessage";
+import { trpc } from "@/lib/trpc";
+import type { Lang } from "@/lib/types";
 
 interface CreateWorkspaceModalProps {
   open: boolean;

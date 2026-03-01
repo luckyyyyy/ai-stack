@@ -2,7 +2,7 @@ import { Dropdown, DropdownDivider, DropdownItem } from "@acme/components";
 import type { Workspace } from "@acme/types";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { Lang } from "../../lib/types";
+import type { Lang } from "@/lib/types";
 
 interface WorkspaceSwitcherProps {
   workspaces: Workspace[];
