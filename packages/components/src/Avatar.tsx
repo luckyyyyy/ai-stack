@@ -1,4 +1,4 @@
-import { getAvatarColor, getAvatarInitial } from "./avatar";
+import { getAvatarColor, getAvatarInitial } from "./avatar-utils";
 
 export type AvatarSize = "xs" | "sm" | "md" | "lg";
 

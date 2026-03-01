@@ -7,7 +7,7 @@
     "predev": "pnpm -C ../types build && pnpm -C ../i18n build",
     "gen:trpc": "tsx scripts/generate-trpc-types.ts",
     "gen:trpc:watch": "tsx scripts/generate-trpc-types.ts --watch",
-    "dev": "concurrently -n trpc,server \"pnpm gen:trpc:watch\" \"node --require @swc-node/register --watch src/main.ts\"",
+    "dev": "concurrently -n trpc,server \"pnpm gen:trpc:watch\" \"node --require ./register.cjs --watch src/main.ts\"",
     "prebuild": "pnpm -C ../types build && pnpm -C ../i18n build",
     "build": "pnpm gen:trpc && tsc -p tsconfig.build.json",
     "start": "node dist/main.js",

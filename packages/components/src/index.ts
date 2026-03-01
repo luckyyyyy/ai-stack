@@ -6,7 +6,7 @@
 
 export type { AvatarSize } from "./Avatar";
 export { Avatar } from "./Avatar";
-export { getAvatarColor, getAvatarInitial } from "./avatar";
+export { getAvatarColor, getAvatarInitial } from "./avatar-utils";
 export type { ButtonProps, ButtonSize, ButtonVariant } from "./Button";
 export { Button } from "./Button";
 export { Dropdown, DropdownDivider, DropdownItem } from "./Dropdown";
