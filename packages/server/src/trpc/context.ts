@@ -1,3 +1,4 @@
+import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 import type { InferSelectModel } from "drizzle-orm";
 import { and, eq, gt } from "drizzle-orm";
 import { db } from "@/db/client";
@@ -7,7 +8,10 @@ import { getCookieValue, SESSION_COOKIE_NAME } from "@/utils/session";
 
 type Workspace = InferSelectModel<typeof workspaces>;
 
-export const createContext = async (req: Request, resHeaders: Headers) => {
+export const createContext = async ({
+  req,
+  resHeaders,
+}: FetchCreateContextFnOptions) => {
   const cookieHeader = req.headers.get("cookie") ?? undefined;
   const sessionId = getCookieValue(cookieHeader, SESSION_COOKIE_NAME);
   let userId: string | undefined;
