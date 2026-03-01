@@ -1,4 +1,4 @@
-.PHONY: init dev build docker tsc lint help
+.PHONY: init dev build docker prod tsc lint help
 
 # 读取环境变量（如果存在）
 -include .env
@@ -9,6 +9,7 @@
 # 镜像名称
 SERVER_IMAGE := apps-server
 WEB_IMAGE := apps-web
+MIGRATE_IMAGE := apps-server-migrate
 COMPOSE_FILE := docker-compose.yml
 
 # 颜色输出
@@ -24,7 +25,8 @@ help: ## 显示帮助信息
 	@printf "  $(YELLOW)make init$(NC)   - 首次初始化项目（清理+安装+迁移）\n"
 	@printf "  $(YELLOW)make dev$(NC)    - 启动开发环境（数据库+开发服务器）\n"
 	@printf "  $(YELLOW)make build$(NC)  - 编译生产版本\n"
-	@printf "  $(YELLOW)make docker$(NC) - 构建并启动 Docker 容器\n"
+	@printf "  $(YELLOW)make docker$(NC) - 构建所有 Docker 镜像\n"
+	@printf "  $(YELLOW)make prod$(NC)   - 构建镜像并启动完整生产栈\n"
 	@printf "$(BLUE)═══════════════════════════════════════$(NC)\n"
 
 init: ## 首次初始化项目（清理+安装+迁移）
@@ -122,11 +124,21 @@ build: ## 编译生产版本
 	@pnpm build
 	@printf "$(GREEN)✓ 编译完成$(NC)\n"
 
-docker: ## 构建 Docker 容器
+docker: ## 构建所有 Docker 镜像（server / migrate / web）
 	@printf "$(GREEN)🐳 构建 Docker 镜像...$(NC)\n"
-	@docker build -f packages/server/Dockerfile -t $(SERVER_IMAGE):latest .
+	@docker build -f packages/server/Dockerfile --target runner -t $(SERVER_IMAGE):latest .
+	@docker build -f packages/server/Dockerfile --target migrate -t $(MIGRATE_IMAGE):latest .
 	@docker build -f packages/web/Dockerfile -t $(WEB_IMAGE):latest .
 	@printf "$(GREEN)✓ 镜像构建完成$(NC)\n"
+
+prod: docker ## 构建镜像并启动完整生产栈（db + minio + migrate + server + web）
+	@printf "$(GREEN)🚀 启动生产环境...$(NC)\n"
+	@docker-compose up -d db minio
+	@docker-compose run --rm minio-init
+	@docker-compose up -d server web
+	@printf "$(GREEN)✓ 生产环境已启动$(NC)\n"
+	@printf "  Server : http://localhost:4000\n"
+	@printf "  Web    : http://localhost:8080\n"
 
 tsc: ## TypeScript 类型检查（所有包）
 	@pnpm -r exec tsc --noEmit

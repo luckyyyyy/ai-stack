@@ -60,6 +60,23 @@ services:
       - app-network
     restart: "no"
 
+  # 数据库迁移（一次性容器，生产环境启动前执行 drizzle-kit push）
+  db-migrate:
+    image: apps-server-migrate:latest
+    container_name: apps-db-migrate
+    build:
+      context: .
+      dockerfile: packages/server/Dockerfile
+      target: migrate
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-apps_db}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: "no"
+
   # 后端服务
   server:
     image: apps-server:latest
@@ -87,6 +104,8 @@ services:
       db:
         condition: service_healthy
       minio-init:
+        condition: service_completed_successfully
+      db-migrate:
         condition: service_completed_successfully
     networks:
       - app-network

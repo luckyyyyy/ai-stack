@@ -3,6 +3,10 @@
   "compilerOptions": {
     "module": "nodenext",
     "moduleResolution": "nodenext",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
     "rootDir": "src",
     "outDir": "dist",
     "sourceMap": true,

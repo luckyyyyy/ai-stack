@@ -7,9 +7,9 @@
     "predev": "pnpm -C ../types build && pnpm -C ../i18n build",
     "gen:trpc": "tsx scripts/generate-trpc-types.ts",
     "gen:trpc:watch": "tsx scripts/generate-trpc-types.ts --watch",
-    "dev": "concurrently -n trpc,server \"pnpm gen:trpc:watch\" \"node --require ./register.cjs --watch src/main.ts\"",
+    "dev": "concurrently -n trpc,server \"pnpm gen:trpc:watch\" \"tsx watch src/main.ts\"",
     "prebuild": "pnpm -C ../types build && pnpm -C ../i18n build",
-    "build": "pnpm gen:trpc && tsc -p tsconfig.build.json",
+    "build": "pnpm gen:trpc && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "start": "node dist/main.js",
     "db:migrate": "drizzle-kit push"
   },
@@ -36,6 +36,7 @@
     "concurrently": "^9.2.1",
     "drizzle-kit": "^0.31.9",
     "ts-morph": "^27.0.2",
+    "tsc-alias": "^1.8.16",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }

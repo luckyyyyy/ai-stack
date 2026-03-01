@@ -28,9 +28,10 @@ COPY packages/server/tsconfig.build.json ./packages/server/
 # 安装所有依赖（包括 devDependencies，构建时需要）
 RUN pnpm install --frozen-lockfile
 
-# 复制源代码和脚本
+# 复制源代码、脚本和 drizzle 配置
 COPY packages/server/src ./packages/server/src
 COPY packages/server/scripts ./packages/server/scripts
+COPY packages/server/drizzle.config.ts ./packages/server/
 
 # 构建应用
 WORKDIR /app/packages/server
@@ -62,7 +63,13 @@ RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 WORKDIR /app/packages/server
 
 # 暴露端口
-EXPOSE 3000
+EXPOSE 4000
 
 # 启动应用
 CMD ["node", "dist/main.js"]
+
+# ─── 迁移阶段（一次性容器，用于生产数据库迁移）───────────────────────────────
+FROM builder AS migrate
+WORKDIR /app/packages/server
+# DATABASE_URL 在 docker-compose 中通过环境变量注入，drizzle 不需要 .env 文件
+CMD ["pnpm", "db:migrate"]
