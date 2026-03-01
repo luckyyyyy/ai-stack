@@ -1,0 +1,175 @@
+import type { UserSettings } from "@acme/types";
+import { TRPCError } from "@trpc/server";
+import { and, eq, ne } from "drizzle-orm";
+import { db } from "../../db/client";
+import { users } from "../../db/schema";
+import { getMessage, type Language } from "../../i18n";
+
+export const toUserOutput = (user: typeof users.$inferSelect) => ({
+  id: user.id,
+  name: user.name,
+  email: user.email,
+  role: user.role as "admin" | "user",
+  settings: (user.settings as UserSettings | null) ?? null,
+});
+
+export class UserService {
+  async getById(userId: string) {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+    return user ?? null;
+  }
+
+  async getByEmail(email: string) {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+    return user ?? null;
+  }
+
+  async checkEmailExists(email: string, excludeUserId?: string) {
+    const conditions = excludeUserId
+      ? and(eq(users.email, email), ne(users.id, excludeUserId))
+      : eq(users.email, email);
+
+    const [existing] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(conditions)
+      .limit(1);
+
+    return !!existing;
+  }
+
+  async updateProfile(
+    userId: string,
+    updates: {
+      name?: string;
+      email?: string;
+      settings?: Partial<UserSettings> | null;
+    },
+    language: Language,
+  ) {
+    if (updates.email) {
+      const emailExists = await this.checkEmailExists(updates.email, userId);
+      if (emailExists) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: getMessage(language, "errors.user.emailInUse"),
+        });
+      }
+    }
+
+    const dbUpdates: Partial<typeof users.$inferInsert> = {};
+    if (updates.name !== undefined) dbUpdates.name = updates.name.trim();
+    if (updates.email !== undefined) dbUpdates.email = updates.email.trim();
+
+    if (updates.settings !== undefined) {
+      if (updates.settings === null) {
+        dbUpdates.settings = null;
+      } else {
+        const [current] = await db
+          .select({ settings: users.settings })
+          .from(users)
+          .where(eq(users.id, userId))
+          .limit(1);
+        const currentSettings =
+          (current?.settings as UserSettings | null) ?? {};
+        dbUpdates.settings = { ...currentSettings, ...updates.settings };
+      }
+    }
+
+    if (Object.keys(dbUpdates).length === 0) {
+      const user = await this.getById(userId);
+      if (!user) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: getMessage(language, "errors.user.notFound"),
+        });
+      }
+      return user;
+    }
+
+    const [updated] = await db
+      .update(users)
+      .set(dbUpdates)
+      .where(eq(users.id, userId))
+      .returning();
+
+    if (!updated) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: getMessage(language, "errors.user.notFound"),
+      });
+    }
+
+    return updated;
+  }
+
+  /**
+   * Update avatarUrl in user settings.
+   * Returns the previous avatarUrl so callers can clean up the old file in storage.
+   */
+  async updateAvatarUrl(
+    userId: string,
+    avatarUrl: string,
+  ): Promise<{
+    updated: typeof users.$inferSelect;
+    previousAvatarUrl: string | null;
+  }> {
+    const [current] = await db
+      .select({ settings: users.settings })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    const currentSettings = (current?.settings as UserSettings | null) ?? {};
+    const previousAvatarUrl = currentSettings.avatarUrl ?? null;
+    const nextSettings = { ...currentSettings, avatarUrl };
+
+    const [updated] = await db
+      .update(users)
+      .set({ settings: nextSettings })
+      .where(eq(users.id, userId))
+      .returning();
+
+    if (!updated) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+    }
+
+    return { updated, previousAvatarUrl };
+  }
+
+  async deleteAvatar(userId: string, language: Language) {
+    const [current] = await db
+      .select({ settings: users.settings })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    const currentSettings = (current?.settings as UserSettings | null) ?? {};
+    const nextSettings = { ...currentSettings, avatarUrl: null };
+
+    const [updated] = await db
+      .update(users)
+      .set({ settings: nextSettings })
+      .where(eq(users.id, userId))
+      .returning();
+
+    if (!updated) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: getMessage(language, "errors.user.notFound"),
+      });
+    }
+
+    return updated;
+  }
+}
+
+export const userService = new UserService();
