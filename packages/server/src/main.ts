@@ -19,8 +19,15 @@ async function bootstrap() {
 
   const app = new Hono();
 
+  const corsOrigins = (
+    process.env.CORS_ORIGIN ?? "http://localhost:5173,http://localhost:4173"
+  )
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
+
   const corsMiddleware = cors({
-    origin: (origin) => origin ?? "*",
+    origin: corsOrigins,
     credentials: true,
     allowHeaders: ["Content-Type", "x-workspace-id", "x-lang"],
     exposeHeaders: ["Set-Cookie"],

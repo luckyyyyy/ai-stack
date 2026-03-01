@@ -4,7 +4,8 @@ import { z } from "zod";
 import { getMessage } from "../../i18n";
 import type { Context } from "../../trpc/context";
 import { Ctx, Mutation, Router } from "../../trpc/decorators";
-import { authService, toUserOutput } from "./auth.service";
+import { toUserOutput } from "../user/user.service";
+import { authService, verifyPassword } from "./auth.service";
 
 export const loginInput = z.object({
   email: z.string().email(),
@@ -33,10 +34,7 @@ export class AuthRouter {
   async login(input: z.infer<typeof loginInput>, @Ctx() ctx: Context) {
     const user = await authService.getUserByEmail(input.email);
 
-    if (
-      !user ||
-      !authService.verifyPassword(input.password, user.passwordHash)
-    ) {
+    if (!user || !verifyPassword(input.password, user.passwordHash)) {
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: getMessage(ctx.language, "errors.auth.invalidCredentials"),

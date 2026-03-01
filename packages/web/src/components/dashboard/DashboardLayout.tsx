@@ -2,7 +2,7 @@ import type { User } from "@acme/types";
 import { useState } from "react";
 import { Navigate, Outlet, useNavigate, useParams } from "react-router-dom";
 import { trpc } from "../../lib/trpc";
-import type { Lang, LangMode, Theme, ThemeMode } from "../../lib/types";
+import type { Lang } from "../../lib/types";
 import { UserMenu } from "../account";
 import { WorkspaceRedirectSkeleton } from "../skeleton";
 import CreateWorkspaceModal from "./CreateWorkspaceModal";
@@ -12,13 +12,8 @@ import WorkspaceSwitcher from "./WorkspaceSwitcher";
 type DashboardLayoutProps = {
   user: User | null;
   lang: Lang;
-  langMode: LangMode;
-  theme: Theme;
-  themeMode: ThemeMode;
   onUpdateUser: (user: User) => void;
   onLogout: () => void;
-  onChangeLangMode: (mode: LangMode) => void;
-  onChangeThemeMode: (mode: ThemeMode) => void;
 };
 
 export default function DashboardLayout({

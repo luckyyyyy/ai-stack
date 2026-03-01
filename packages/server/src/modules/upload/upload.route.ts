@@ -4,15 +4,12 @@
  *
  * POST /upload/avatar   — authenticated, multipart/form-data, field "file"
  */
-import { and, eq, gt } from "drizzle-orm";
 import { Hono } from "hono";
-import { db } from "../../db/client";
-import { sessions } from "../../db/schema";
 import { Logger } from "../../logger";
 import { storage } from "../../storage";
+import { resolveSessionUserId } from "../../utils/session";
 import { toUserOutput, userService } from "../user/user.service";
 
-const SESSION_COOKIE_NAME = "SESSION_ID";
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 const ALLOWED_MIME = new Set([
   "image/jpeg",
@@ -23,40 +20,11 @@ const ALLOWED_MIME = new Set([
 
 const logger = new Logger("UploadRoute");
 
-function getCookieValue(
-  cookieHeader: string | undefined,
-  name: string,
-): string | undefined {
-  if (!cookieHeader) return undefined;
-  const match = cookieHeader
-    .split(";")
-    .map((s) => s.trim())
-    .find((s) => s.startsWith(`${name}=`));
-  return match ? decodeURIComponent(match.split("=")[1]) : undefined;
-}
-
-/** Resolve userId from session cookie; returns undefined if unauthenticated. */
-async function resolveUserId(
-  cookieHeader: string | undefined,
-): Promise<string | undefined> {
-  const sessionId = getCookieValue(cookieHeader, SESSION_COOKIE_NAME);
-  if (!sessionId) return undefined;
-
-  const [session] = await db
-    .select({ userId: sessions.userId })
-    .from(sessions)
-    .where(and(eq(sessions.id, sessionId), gt(sessions.expiresAt, new Date())))
-    .limit(1);
-
-  return session?.userId;
-}
-
 export const uploadRouter = new Hono();
 
 uploadRouter.post("/avatar", async (c) => {
-  // --- Auth ---
   const cookieHeader = c.req.header("cookie");
-  const userId = await resolveUserId(cookieHeader);
+  const userId = await resolveSessionUserId(cookieHeader);
   if (!userId) {
     return c.json({ error: "Unauthorized" }, 401);
   }

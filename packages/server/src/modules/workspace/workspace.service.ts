@@ -3,6 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { workspaceMembers, workspaces } from "../../db/schema";
 import { getMessage, type Language } from "../../i18n";
+import { slugify } from "../../utils/slugify";
 
 export const toWorkspaceOutput = (
   dbWorkspace: typeof workspaces.$inferSelect,
@@ -13,13 +14,6 @@ export const toWorkspaceOutput = (
   description: dbWorkspace.description,
   createdAt: dbWorkspace.createdAt?.toISOString(),
 });
-
-const slugify = (value: string) =>
-  value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)+/g, "");
 
 export class WorkspaceService {
   async listByUser(userId: string) {

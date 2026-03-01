@@ -42,4 +42,22 @@ function createStorageProvider(): StorageProvider {
   throw new Error(`Unknown STORAGE_PROVIDER: "${provider}"`);
 }
 
-export const storage = createStorageProvider();
+/**
+ * Lazy singleton — the provider is created on first access, not at module load.
+ * This prevents startup failures when STORAGE_* env vars are not configured
+ * (e.g. during unit tests or when file upload is not used).
+ */
+let _provider: StorageProvider | undefined;
+
+const getProvider = (): StorageProvider => {
+  if (!_provider) _provider = createStorageProvider();
+  return _provider;
+};
+
+export const storage: StorageProvider = {
+  uploadFile: (key, body, contentType) =>
+    getProvider().uploadFile(key, body, contentType),
+  deleteFile: (key) => getProvider().deleteFile(key),
+  getPublicUrl: (key) => getProvider().getPublicUrl(key),
+  extractKey: (url) => getProvider().extractKey(url),
+};

@@ -93,13 +93,8 @@ function AppContent() {
             <DashboardLayout
               user={user}
               lang={lang}
-              langMode={langMode}
-              theme={theme}
-              themeMode={themeMode}
               onUpdateUser={updateUser}
               onLogout={logout}
-              onChangeLangMode={setLangMode}
-              onChangeThemeMode={setThemeMode}
             />
           }
         >
@@ -135,7 +130,10 @@ export default function App({
       window.location.assign("/unauthorized");
   };
 
-  const handleTrpcError = (error: unknown) => {
+  // Use a ref so the stable QueryClient onError always calls the latest handler
+  // without re-creating QueryClient (and dropping cached state) on re-renders.
+  const handleTrpcErrorRef = useRef<(error: unknown) => void>(() => {});
+  handleTrpcErrorRef.current = (error: unknown) => {
     if (error instanceof TRPCClientError) {
       const code = error.data?.code;
       if (code === "UNAUTHORIZED") {
@@ -162,11 +160,10 @@ export default function App({
       new QueryClient({
         defaultOptions: {
           queries: { retry: 1 },
-          mutations: { onError: handleTrpcError },
+          mutations: { onError: (error) => handleTrpcErrorRef.current(error) },
         },
       }),
-    // biome-ignore lint/correctness/useExhaustiveDependencies: handleTrpcError intentionally omits stable i18n/message deps
-    [handleTrpcError],
+    [], // stable: the ref always holds the latest handler
   );
 
   return (

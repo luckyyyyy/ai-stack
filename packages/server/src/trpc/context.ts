@@ -3,19 +3,9 @@ import { and, eq, gt } from "drizzle-orm";
 import { db } from "../db/client";
 import { sessions, workspaces } from "../db/schema";
 import { normalizeLanguage } from "../i18n";
+import { getCookieValue, SESSION_COOKIE_NAME } from "../utils/session";
 
 type Workspace = InferSelectModel<typeof workspaces>;
-
-const SESSION_COOKIE_NAME = "SESSION_ID";
-
-const getCookieValue = (cookieHeader: string | undefined, name: string) => {
-  if (!cookieHeader) return undefined;
-  const match = cookieHeader
-    .split(";")
-    .map((item) => item.trim())
-    .find((item) => item.startsWith(`${name}=`));
-  return match ? decodeURIComponent(match.split("=")[1]) : undefined;
-};
 
 export const createContext = async (req: Request, resHeaders: Headers) => {
   const cookieHeader = req.headers.get("cookie") ?? undefined;
