@@ -16,7 +16,7 @@
     "db:migrate": "pnpm -C packages/server db:migrate"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.3.11",
+    "@biomejs/biome": "^2.4.4",
     "concurrently": "^9.2.1"
   }
 }

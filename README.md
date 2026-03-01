@@ -1,13 +1,13 @@
 # ai-stack
 
-> Production-ready full-stack scaffold for building AI-powered applications.  
+> Production-ready full-stack scaffold for building AI-powered applications.
 > Monorepo · Hono · tRPC · React 19 · Drizzle ORM · TypeScript
 
 ---
 
 ## Why ai-stack?
 
-Building AI products requires moving fast without sacrificing type-safety or scalability.  
+Building AI products requires moving fast without sacrificing type-safety or scalability.
 **ai-stack** gives you a battle-tested monorepo foundation so you can focus on the AI logic — not the boilerplate.
 
 - **End-to-end type-safety** via tRPC + Zod v4 — from DB schema to UI props
@@ -132,7 +132,7 @@ make dev
 
 ## Adding AI Features
 
-The scaffold is intentionally unopinionated about which AI SDK you use.  
+The scaffold is intentionally unopinionated about which AI SDK you use.
 Here's the recommended pattern for adding LLM capabilities:
 
 ```bash
