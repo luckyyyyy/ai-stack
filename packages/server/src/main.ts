@@ -48,7 +48,7 @@ async function bootstrap() {
     "/trpc/*",
     trpcServer({
       router: appRouter,
-      createContext: (opts) => createContext(opts.req, opts.resHeaders),
+      createContext,
     }),
   );
 
