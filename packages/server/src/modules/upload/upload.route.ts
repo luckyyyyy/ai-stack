@@ -6,9 +6,9 @@
  */
 import { Hono } from "hono";
 import { Logger } from "@/logger";
+import { toUserOutput, userService } from "@/modules/user/user.service";
 import { storage } from "@/storage";
 import { resolveSessionUserId } from "@/utils/session";
-import { toUserOutput, userService } from "@/modules/user/user.service";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 const ALLOWED_MIME = new Set([

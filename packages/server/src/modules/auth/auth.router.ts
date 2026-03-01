@@ -7,9 +7,9 @@ import {
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getMessage } from "@/i18n";
+import { toUserOutput } from "@/modules/user/user.service";
 import type { Context } from "@/trpc/context";
 import { Ctx, Mutation, Router } from "@/trpc/decorators";
-import { toUserOutput } from "@/modules/user/user.service";
 import { authService, verifyPassword } from "./auth.service";
 
 @Router({ alias: "auth" })
