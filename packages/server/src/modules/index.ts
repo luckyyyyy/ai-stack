@@ -1,4 +1,3 @@
-// Import all module routers to register them
-import "./auth";
-import "./user";
-import "./workspace";
+export { authRouter } from "./auth/auth.router";
+export { userRouter } from "./user/user.router";
+export { workspaceRouter } from "./workspace/workspace.router";

@@ -2,22 +2,22 @@ import { Link } from "react-router-dom";
 
 export default function UnauthorizedPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200 px-4 text-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 dark:text-slate-100">
+    <div className="flex min-h-screen items-center justify-center bg-[var(--ui-bg-subtle)] px-4 text-[var(--ui-text)]">
       <div className="relative max-w-lg text-center">
         {/* Decorative background elements */}
-        <div className="absolute -top-20 -left-20 h-40 w-40 rounded-full bg-gradient-to-br from-red-400/20 to-orange-400/20 blur-3xl dark:from-red-600/10 dark:to-orange-600/10" />
-        <div className="absolute -bottom-20 -right-20 h-40 w-40 rounded-full bg-gradient-to-br from-amber-400/20 to-yellow-400/20 blur-3xl dark:from-amber-600/10 dark:to-yellow-600/10" />
+        <div className="absolute -top-20 -left-20 h-40 w-40 rounded-full bg-[var(--ui-btn-danger-bg)] blur-3xl opacity-10" />
+        <div className="absolute -bottom-20 -right-20 h-40 w-40 rounded-full bg-[var(--ui-btn-danger-bg)] blur-3xl opacity-10" />
 
         {/* Main content */}
         <div className="relative">
           {/* 403 illustration */}
           <div className="mb-8 flex items-center justify-center">
             <div className="relative">
-              <span className="text-[180px] font-black leading-none text-slate-200 dark:text-slate-800 select-none">
+              <span className="text-[180px] font-black leading-none text-[var(--ui-bg-element)] select-none">
                 403
               </span>
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-orange-600 shadow-2xl shadow-red-500/30 dark:shadow-red-500/20">
+                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-[var(--ui-btn-danger-bg)] shadow-lg">
                   <svg
                     aria-hidden="true"
                     className="h-12 w-12 text-white"
@@ -37,16 +37,16 @@ export default function UnauthorizedPage() {
             </div>
           </div>
 
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">
+          <h1 className="text-2xl font-bold text-[var(--ui-text)]">
             访问受限
           </h1>
-          <p className="mt-3 text-slate-500 dark:text-slate-400">
+          <p className="mt-3 text-[var(--ui-text-muted)]">
             抱歉，您没有权限访问此页面
           </p>
 
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-500 to-orange-600 px-6 py-3 font-medium text-white shadow-lg shadow-red-500/30 transition-all hover:shadow-xl hover:shadow-red-500/40 hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 rounded-md bg-[var(--ui-btn-danger-bg)] hover:bg-[var(--ui-btn-danger-bg-hover)] px-5 py-2.5 font-medium text-[var(--ui-btn-danger-text)] transition-colors"
               to="/"
             >
               <svg
@@ -66,7 +66,7 @@ export default function UnauthorizedPage() {
               返回首页
             </Link>
             <Link
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 font-medium text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              className="inline-flex items-center gap-2 rounded-md border bg-[var(--ui-btn-secondary-bg)] hover:bg-[var(--ui-btn-secondary-bg-hover)] border-[var(--ui-btn-secondary-border)] px-5 py-2.5 font-medium text-[var(--ui-btn-secondary-text)] transition-colors"
               to="/login"
             >
               <svg

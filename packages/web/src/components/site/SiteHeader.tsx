@@ -25,7 +25,7 @@ export default function SiteHeader({
     <header className="sticky top-0 z-30 border-b border-[var(--ui-border)] bg-[var(--ui-bg)]">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Link to="/" className="flex items-center gap-2">
-          <span className="h-3 w-3 rounded-full bg-gradient-to-r from-sky-500 to-emerald-400" />
+          <span className="h-3 w-3 rounded-full bg-gradient-to-r from-[#007fd4] to-[#4fc1ff]" />
           <span className="text-lg font-semibold">Acme</span>
         </Link>
         <div className="flex items-center gap-4">

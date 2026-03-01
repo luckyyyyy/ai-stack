@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import "dotenv/config";
 
 import { serve } from "@hono/node-server";
@@ -8,14 +7,12 @@ import { cors } from "hono/cors";
 import { Logger } from "./logger";
 import { uploadRouter } from "./modules/upload/upload.route";
 import { createContext } from "./trpc/context";
+import { appRouter } from "./trpc/router";
 
 async function bootstrap() {
   const startLogger = new Logger("HonoFactory");
   Logger.resetTimer();
   startLogger.log("Starting Hono application...");
-
-  // Dynamic import so the "Starting..." message is printed BEFORE routers are registered
-  const { appRouter } = await import("./trpc/router.js");
 
   const app = new Hono();
 

@@ -14,7 +14,6 @@ export {
   UserProfileOutputSchema,
   UserUpdateInputSchema,
 } from "./api";
-export type { AppRouter } from "./trpc/@generated/app-router";
 export type { User, UserSettings } from "./user";
 export {
   UserSchema,

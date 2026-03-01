@@ -66,10 +66,16 @@ body {
 
 @layer components {
   .btn {
-    @apply rounded-lg bg-slate-900 px-4 py-2 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white;
+    @apply rounded-md px-4 py-2 font-medium transition-colors;
+    background-color: var(--ui-btn-primary-bg);
+    color: var(--ui-btn-primary-text);
+    &:hover { background-color: var(--ui-btn-primary-bg-hover); }
   }
 
   .card {
-    @apply rounded-2xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-900/60 dark:shadow-black/30;
+    @apply rounded-lg border p-6;
+    background-color: var(--ui-bg);
+    border-color: var(--ui-border);
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--ui-text) 6%, transparent);
   }
 }

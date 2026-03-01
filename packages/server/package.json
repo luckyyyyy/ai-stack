@@ -6,11 +6,9 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "predev": "pnpm -C ../types build && pnpm -C ../i18n build",
-    "gen:trpc": "tsx scripts/generate-trpc-types.ts",
-    "gen:trpc:watch": "tsx scripts/generate-trpc-types.ts --watch",
-    "dev": "concurrently -n trpc,server \"pnpm gen:trpc:watch\" \"tsx watch src/main.ts\"",
+    "dev": "tsx watch src/main.ts",
     "prebuild": "pnpm -C ../types build && pnpm -C ../i18n build",
-    "build": "pnpm gen:trpc && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "start": "node dist/main.js",
     "db:migrate": "drizzle-kit push"
   },
@@ -25,15 +23,12 @@
     "drizzle-orm": "^0.45.1",
     "hono": "^4.12.3",
     "pg": "^8.19.0",
-    "reflect-metadata": "^0.2.2",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^25.3.3",
     "@types/pg": "^8.18.0",
-    "concurrently": "^9.2.1",
     "drizzle-kit": "^0.31.9",
-    "ts-morph": "^27.0.2",
     "tsc-alias": "^1.8.16",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
