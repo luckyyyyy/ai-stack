@@ -60,7 +60,7 @@ services:
       - app-network
     restart: "no"
 
-  # 数据库迁移（一次性容器，生产环境启动前执行 drizzle-kit push）
+  # 数据库迁移（一次性容器，生产环境启动前执行 prisma db push）
   db-migrate:
     image: apps-server-migrate:latest
     container_name: apps-db-migrate

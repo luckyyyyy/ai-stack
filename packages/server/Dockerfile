@@ -25,13 +25,17 @@ COPY packages/server/package.json ./packages/server/
 COPY packages/server/tsconfig.json ./packages/server/
 COPY packages/server/tsconfig.build.json ./packages/server/
 
-# 安装所有依赖（包括 devDependencies，构建时需要）
-RUN pnpm install --frozen-lockfile
+# 复制 Prisma schema（prisma generate 在安装时需要它）
+COPY packages/server/prisma ./packages/server/prisma
 
-# 复制源代码、脚本和 drizzle 配置
+# 安装所有依赖（包括 devDependencies，构建时需要）
+RUN pnpm install --frozen-lockfile --ignore-scripts
+
+# 生成 Prisma Client
+RUN pnpm --filter @acme/server db:generate
+
+# 复制源代码
 COPY packages/server/src ./packages/server/src
-COPY packages/server/scripts ./packages/server/scripts
-COPY packages/server/drizzle.config.ts ./packages/server/
 
 # 构建应用
 WORKDIR /app/packages/server
@@ -50,6 +54,7 @@ COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 COPY packages/types/package.json ./packages/types/
 COPY packages/i18n/package.json ./packages/i18n/
 COPY packages/server/package.json ./packages/server/
+COPY packages/server/prisma ./packages/server/prisma
 
 # 从构建阶段复制构建产物（在安装依赖前，避免 prepare 脚本运行）
 COPY --from=builder /app/packages/types/dist ./packages/types/dist
@@ -58,6 +63,9 @@ COPY --from=builder /app/packages/server/dist ./packages/server/dist
 
 # 只安装生产依赖
 RUN pnpm install --prod --frozen-lockfile --ignore-scripts
+
+# 生成 Prisma Client（生产环境）
+RUN pnpm --filter @acme/server db:generate
 
 # 设置工作目录
 WORKDIR /app/packages/server
@@ -71,5 +79,6 @@ CMD ["node", "dist/main.js"]
 # ─── 迁移阶段（一次性容器，用于生产数据库迁移）───────────────────────────────
 FROM builder AS migrate
 WORKDIR /app/packages/server
-# DATABASE_URL 在 docker-compose 中通过环境变量注入，drizzle 不需要 .env 文件
-CMD ["pnpm", "db:migrate"]
+# DATABASE_URL 在 docker-compose 中通过环境变量注入
+CMD ["pnpm", "db:push"]
+

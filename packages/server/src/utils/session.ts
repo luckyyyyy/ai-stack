@@ -2,9 +2,7 @@
  * Shared session / cookie utilities.
  * Used by tRPC context, upload routes, and auth service to avoid duplication.
  */
-import { and, eq, gt } from "drizzle-orm";
-import { db } from "@/db/client";
-import { sessions } from "@/db/schema";
+import { prisma } from "@/db/client";
 
 export const SESSION_COOKIE_NAME = "SESSION_ID";
 
@@ -29,10 +27,9 @@ export const resolveSessionUserId = async (
 ): Promise<string | undefined> => {
   const sessionId = getCookieValue(cookieHeader, SESSION_COOKIE_NAME);
   if (!sessionId) return undefined;
-  const [session] = await db
-    .select({ userId: sessions.userId })
-    .from(sessions)
-    .where(and(eq(sessions.id, sessionId), gt(sessions.expiresAt, new Date())))
-    .limit(1);
+  const session = await prisma.session.findFirst({
+    where: { id: sessionId, expiresAt: { gt: new Date() } },
+    select: { userId: true },
+  });
   return session?.userId;
 };

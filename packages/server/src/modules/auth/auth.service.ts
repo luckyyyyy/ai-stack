@@ -1,7 +1,5 @@
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
-import { eq } from "drizzle-orm";
-import { db } from "@/db/client";
-import { sessions, users, workspaceMembers, workspaces } from "@/db/schema";
+import { prisma } from "@/db/client";
 import { SESSION_COOKIE_NAME } from "@/utils/session";
 import { slugify } from "@/utils/slugify";
 
@@ -24,19 +22,16 @@ const MAX_SLUG_ATTEMPTS = 100;
 
 export class AuthService {
   async getUserByEmail(email: string) {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
-    return user ?? null;
+    return prisma.user.findFirst({ where: { email } });
   }
 
   async getDefaultWorkspaceSlug(userId: string) {
-    const [workspace] = await db
-      .select({ slug: workspaces.slug })
-      .from(workspaceMembers)
-      .innerJoin(workspaces, eq(workspaceMembers.workspaceId, workspaces.id))
-      .where(eq(workspaceMembers.userId, userId))
-      .orderBy(workspaces.createdAt)
-      .limit(1);
-    return workspace?.slug ?? null;
+    const member = await prisma.workspaceMember.findFirst({
+      where: { userId },
+      include: { workspace: { select: { slug: true } } },
+      orderBy: { workspace: { createdAt: "asc" } },
+    });
+    return member?.workspace.slug ?? null;
   }
 
   async ensureUniqueWorkspaceSlug(base: string) {
@@ -45,11 +40,10 @@ export class AuthService {
     let suffix = 1;
 
     while (suffix <= MAX_SLUG_ATTEMPTS) {
-      const [existing] = await db
-        .select({ id: workspaces.id })
-        .from(workspaces)
-        .where(eq(workspaces.slug, slug))
-        .limit(1);
+      const existing = await prisma.workspace.findFirst({
+        where: { slug },
+        select: { id: true },
+      });
       if (!existing) return slug;
       slug = `${baseSlug}-${suffix}`;
       suffix += 1;
@@ -63,51 +57,49 @@ export class AuthService {
     const expiresAt = new Date(
       Date.now() + SESSION_COOKIE_MAX_AGE_SECONDS * 1000,
     );
-    const [session] = await db
-      .insert(sessions)
-      .values({ userId, expiresAt })
-      .returning({ id: sessions.id });
+    const session = await prisma.session.create({
+      data: { userId, expiresAt },
+      select: { id: true },
+    });
     return session.id;
   }
 
   async deleteSession(sessionId: string) {
-    await db.delete(sessions).where(eq(sessions.id, sessionId));
+    await prisma.session.delete({ where: { id: sessionId } }).catch(() => {});
   }
 
   async registerUser(input: { name: string; email: string; password: string }) {
     const workspaceName = `${input.name}的空间站`;
     const workspaceSlug = await this.ensureUniqueWorkspaceSlug(workspaceName);
 
-    const result = await db.transaction(async (tx) => {
-      const [createdUser] = await tx
-        .insert(users)
-        .values({
+    return prisma.$transaction(async (tx) => {
+      const createdUser = await tx.user.create({
+        data: {
           name: input.name,
           email: input.email,
           passwordHash: hashPassword(input.password),
           role: "user",
-        })
-        .returning();
+        },
+      });
 
-      const [createdWorkspace] = await tx
-        .insert(workspaces)
-        .values({
+      const createdWorkspace = await tx.workspace.create({
+        data: {
           slug: workspaceSlug,
           name: workspaceName,
           description: "默认工作空间",
-        })
-        .returning();
+        },
+      });
 
-      await tx.insert(workspaceMembers).values({
-        workspaceId: createdWorkspace.id,
-        userId: createdUser.id,
-        role: "owner",
+      await tx.workspaceMember.create({
+        data: {
+          workspaceId: createdWorkspace.id,
+          userId: createdUser.id,
+          role: "owner",
+        },
       });
 
       return { user: createdUser, workspace: createdWorkspace };
     });
-
-    return result;
   }
 
   async getOrCreateDevUser() {

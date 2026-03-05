@@ -1,65 +1,47 @@
+import type { Workspace } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { and, eq } from "drizzle-orm";
-import { db } from "@/db/client";
-import { workspaceMembers, workspaces } from "@/db/schema";
+import { prisma } from "@/db/client";
 import { getMessage, type Language } from "@/i18n";
 import { slugify } from "@/utils/slugify";
 
-export const toWorkspaceOutput = (
-  dbWorkspace: typeof workspaces.$inferSelect,
-) => ({
-  id: dbWorkspace.id,
-  slug: dbWorkspace.slug,
-  name: dbWorkspace.name,
-  description: dbWorkspace.description,
-  createdAt: dbWorkspace.createdAt?.toISOString(),
+export const toWorkspaceOutput = (workspace: Workspace) => ({
+  id: workspace.id,
+  slug: workspace.slug,
+  name: workspace.name,
+  description: workspace.description,
+  createdAt: workspace.createdAt?.toISOString(),
 });
 
 export class WorkspaceService {
   async listByUser(userId: string) {
-    const rows = await db
-      .select()
-      .from(workspaceMembers)
-      .innerJoin(workspaces, eq(workspaceMembers.workspaceId, workspaces.id))
-      .where(eq(workspaceMembers.userId, userId));
-
-    return rows.map((row) => row.workspaces);
+    const members = await prisma.workspaceMember.findMany({
+      where: { userId },
+      include: { workspace: true },
+    });
+    return members.map((m) => m.workspace);
   }
 
   async getBySlug(slug: string, userId: string) {
-    const [row] = await db
-      .select()
-      .from(workspaceMembers)
-      .innerJoin(workspaces, eq(workspaceMembers.workspaceId, workspaces.id))
-      .where(
-        and(eq(workspaceMembers.userId, userId), eq(workspaces.slug, slug)),
-      )
-      .limit(1);
-
-    return row?.workspaces ?? null;
+    const member = await prisma.workspaceMember.findFirst({
+      where: { userId, workspace: { slug } },
+      include: { workspace: true },
+    });
+    return member?.workspace ?? null;
   }
 
   async getById(id: string) {
-    const [workspace] = await db
-      .select()
-      .from(workspaces)
-      .where(eq(workspaces.id, id))
-      .limit(1);
-
-    return workspace ?? null;
+    return prisma.workspace.findFirst({ where: { id } });
   }
 
   async ensureUniqueSlug(baseSlug: string) {
     let slug = baseSlug;
     let suffix = 1;
 
-    // eslint-disable-next-line no-constant-condition
     while (true) {
-      const [existing] = await db
-        .select({ id: workspaces.id })
-        .from(workspaces)
-        .where(eq(workspaces.slug, slug))
-        .limit(1);
+      const existing = await prisma.workspace.findFirst({
+        where: { slug },
+        select: { id: true },
+      });
       if (!existing) break;
       suffix += 1;
       slug = `${baseSlug}-${suffix}`;
@@ -75,26 +57,21 @@ export class WorkspaceService {
     const baseSlug = input.slug?.trim() || slugify(input.name) || "workspace";
     const slug = await this.ensureUniqueSlug(baseSlug);
 
-    const result = await db.transaction(async (tx) => {
-      const [workspace] = await tx
-        .insert(workspaces)
-        .values({
+    return prisma.$transaction(async (tx) => {
+      const workspace = await tx.workspace.create({
+        data: {
           name: input.name,
           slug,
           description: input.description ?? null,
-        })
-        .returning();
+        },
+      });
 
-      await tx.insert(workspaceMembers).values({
-        workspaceId: workspace.id,
-        userId,
-        role: "owner",
+      await tx.workspaceMember.create({
+        data: { workspaceId: workspace.id, userId, role: "owner" },
       });
 
       return workspace;
     });
-
-    return result;
   }
 
   async update(
@@ -112,17 +89,10 @@ export class WorkspaceService {
       });
     }
 
-    const [ownerMember] = await db
-      .select({ id: workspaceMembers.id })
-      .from(workspaceMembers)
-      .where(
-        and(
-          eq(workspaceMembers.workspaceId, id),
-          eq(workspaceMembers.userId, userId),
-          eq(workspaceMembers.role, "owner"),
-        ),
-      )
-      .limit(1);
+    const ownerMember = await prisma.workspaceMember.findFirst({
+      where: { workspaceId: id, userId, role: "owner" },
+      select: { id: true },
+    });
 
     if (!ownerMember) {
       throw new TRPCError({
@@ -134,11 +104,10 @@ export class WorkspaceService {
     let nextSlug = input.slug?.trim();
     if (nextSlug) {
       nextSlug = slugify(nextSlug) || workspace.slug;
-      const [existing] = await db
-        .select({ id: workspaces.id })
-        .from(workspaces)
-        .where(eq(workspaces.slug, nextSlug))
-        .limit(1);
+      const existing = await prisma.workspace.findFirst({
+        where: { slug: nextSlug },
+        select: { id: true },
+      });
       if (existing && existing.id !== workspace.id) {
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -147,20 +116,17 @@ export class WorkspaceService {
       }
     }
 
-    const [updated] = await db
-      .update(workspaces)
-      .set({
+    return prisma.workspace.update({
+      where: { id },
+      data: {
         name: input.name ?? workspace.name,
         slug: nextSlug ?? workspace.slug,
         description:
           input.description !== undefined
             ? input.description
             : workspace.description,
-      })
-      .where(eq(workspaces.id, id))
-      .returning();
-
-    return updated;
+      },
+    });
   }
 
   async delete(id: string, userId: string, language: Language) {
@@ -173,17 +139,10 @@ export class WorkspaceService {
       });
     }
 
-    const [ownerMember] = await db
-      .select({ id: workspaceMembers.id })
-      .from(workspaceMembers)
-      .where(
-        and(
-          eq(workspaceMembers.workspaceId, id),
-          eq(workspaceMembers.userId, userId),
-          eq(workspaceMembers.role, "owner"),
-        ),
-      )
-      .limit(1);
+    const ownerMember = await prisma.workspaceMember.findFirst({
+      where: { workspaceId: id, userId, role: "owner" },
+      select: { id: true },
+    });
 
     if (!ownerMember) {
       throw new TRPCError({
@@ -192,11 +151,9 @@ export class WorkspaceService {
       });
     }
 
-    await db.transaction(async (tx) => {
-      await tx
-        .delete(workspaceMembers)
-        .where(eq(workspaceMembers.workspaceId, id));
-      await tx.delete(workspaces).where(eq(workspaces.id, id));
+    await prisma.$transaction(async (tx) => {
+      await tx.workspaceMember.deleteMany({ where: { workspaceId: id } });
+      await tx.workspace.delete({ where: { id } });
     });
 
     return { id };

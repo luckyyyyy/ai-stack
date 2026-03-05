@@ -100,7 +100,7 @@ init: ## 首次初始化项目（清理+安装+迁移）
 	@printf "$(GREEN)✓ MinIO 存储桶已就绪$(NC)\n"
 	@printf "\n"
 	@printf "$(YELLOW)🗃️  [8/8] 执行数据库迁移...$(NC)\n"
-	@pnpm --filter @acme/server db:migrate
+	@pnpm --filter @acme/server db:push
 	@printf "$(GREEN)✓ 数据库迁移完成$(NC)\n"
 	@printf "\n"
 	@printf "\n"
