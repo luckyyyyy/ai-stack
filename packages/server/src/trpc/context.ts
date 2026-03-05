@@ -1,24 +1,17 @@
-import type { InferSelectModel } from "drizzle-orm";
-import { and, eq, gt } from "drizzle-orm";
-import { db } from "@/db/client";
-import { sessions, workspaces } from "@/db/schema";
+import type { Workspace } from "@prisma/client";
+import { prisma } from "@/db/client";
 import { normalizeLanguage } from "@/i18n";
 import { getCookieValue, SESSION_COOKIE_NAME } from "@/utils/session";
-
-type Workspace = InferSelectModel<typeof workspaces>;
 
 export const createContext = async (req: Request, resHeaders: Headers) => {
   const cookieHeader = req.headers.get("cookie") ?? undefined;
   const sessionId = getCookieValue(cookieHeader, SESSION_COOKIE_NAME);
   let userId: string | undefined;
   if (sessionId) {
-    const [session] = await db
-      .select({ userId: sessions.userId })
-      .from(sessions)
-      .where(
-        and(eq(sessions.id, sessionId), gt(sessions.expiresAt, new Date())),
-      )
-      .limit(1);
+    const session = await prisma.session.findFirst({
+      where: { id: sessionId, expiresAt: { gt: new Date() } },
+      select: { userId: true },
+    });
     userId = session?.userId;
   }
   const workspaceKey = req.headers.get("x-workspace-id");
@@ -29,7 +22,7 @@ export const createContext = async (req: Request, resHeaders: Headers) => {
   );
 
   return {
-    db,
+    prisma,
     userId,
     sessionId,
     workspaceKey: workspaceKey ?? undefined,

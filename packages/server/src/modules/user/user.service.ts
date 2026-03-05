@@ -1,11 +1,11 @@
 import type { UserSettings } from "@acme/types";
+import type { User } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { and, eq, ne } from "drizzle-orm";
-import { db } from "@/db/client";
-import { users } from "@/db/schema";
+import { prisma } from "@/db/client";
 import { getMessage, type Language } from "@/i18n";
 
-export const toUserOutput = (user: typeof users.$inferSelect) => ({
+export const toUserOutput = (user: User) => ({
   id: user.id,
   name: user.name,
   email: user.email,
@@ -13,36 +13,38 @@ export const toUserOutput = (user: typeof users.$inferSelect) => ({
   settings: (user.settings as UserSettings | null) ?? null,
 });
 
+const updateUserOrThrow = async (
+  userId: string,
+  data: Prisma.UserUpdateInput,
+  notFoundMessage: string,
+): Promise<User> => {
+  try {
+    return await prisma.user.update({ where: { id: userId }, data });
+  } catch (err) {
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === "P2025"
+    ) {
+      throw new TRPCError({ code: "NOT_FOUND", message: notFoundMessage });
+    }
+    throw err;
+  }
+};
+
 export class UserService {
   async getById(userId: string) {
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
-    return user ?? null;
+    return prisma.user.findFirst({ where: { id: userId } });
   }
 
   async getByEmail(email: string) {
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
-    return user ?? null;
+    return prisma.user.findFirst({ where: { email } });
   }
 
   async checkEmailExists(email: string, excludeUserId?: string) {
-    const conditions = excludeUserId
-      ? and(eq(users.email, email), ne(users.id, excludeUserId))
-      : eq(users.email, email);
-
-    const [existing] = await db
-      .select({ id: users.id })
-      .from(users)
-      .where(conditions)
-      .limit(1);
-
+    const existing = await prisma.user.findFirst({
+      where: excludeUserId ? { email, id: { not: excludeUserId } } : { email },
+      select: { id: true },
+    });
     return !!existing;
   }
 
@@ -65,26 +67,25 @@ export class UserService {
       }
     }
 
-    const dbUpdates: Partial<typeof users.$inferInsert> = {};
-    if (updates.name !== undefined) dbUpdates.name = updates.name.trim();
-    if (updates.email !== undefined) dbUpdates.email = updates.email.trim();
+    const data: Prisma.UserUpdateInput = {};
+    if (updates.name !== undefined) data.name = updates.name.trim();
+    if (updates.email !== undefined) data.email = updates.email.trim();
 
     if (updates.settings !== undefined) {
       if (updates.settings === null) {
-        dbUpdates.settings = null;
+        data.settings = Prisma.DbNull;
       } else {
-        const [current] = await db
-          .select({ settings: users.settings })
-          .from(users)
-          .where(eq(users.id, userId))
-          .limit(1);
+        const current = await prisma.user.findFirst({
+          where: { id: userId },
+          select: { settings: true },
+        });
         const currentSettings =
           (current?.settings as UserSettings | null) ?? {};
-        dbUpdates.settings = { ...currentSettings, ...updates.settings };
+        data.settings = { ...currentSettings, ...updates.settings };
       }
     }
 
-    if (Object.keys(dbUpdates).length === 0) {
+    if (Object.keys(data).length === 0) {
       const user = await this.getById(userId);
       if (!user) {
         throw new TRPCError({
@@ -95,20 +96,11 @@ export class UserService {
       return user;
     }
 
-    const [updated] = await db
-      .update(users)
-      .set(dbUpdates)
-      .where(eq(users.id, userId))
-      .returning();
-
-    if (!updated) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: getMessage(language, "errors.user.notFound"),
-      });
-    }
-
-    return updated;
+    return updateUserOrThrow(
+      userId,
+      data,
+      getMessage(language, "errors.user.notFound"),
+    );
   }
 
   /**
@@ -118,57 +110,39 @@ export class UserService {
   async updateAvatarUrl(
     userId: string,
     avatarUrl: string,
-  ): Promise<{
-    updated: typeof users.$inferSelect;
-    previousAvatarUrl: string | null;
-  }> {
-    const [current] = await db
-      .select({ settings: users.settings })
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
+  ): Promise<{ updated: User; previousAvatarUrl: string | null }> {
+    const current = await prisma.user.findFirst({
+      where: { id: userId },
+      select: { settings: true },
+    });
 
     const currentSettings = (current?.settings as UserSettings | null) ?? {};
     const previousAvatarUrl = currentSettings.avatarUrl ?? null;
     const nextSettings = { ...currentSettings, avatarUrl };
 
-    const [updated] = await db
-      .update(users)
-      .set({ settings: nextSettings })
-      .where(eq(users.id, userId))
-      .returning();
-
-    if (!updated) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
-    }
+    const updated = await updateUserOrThrow(
+      userId,
+      { settings: nextSettings },
+      "User not found",
+    );
 
     return { updated, previousAvatarUrl };
   }
 
   async deleteAvatar(userId: string, language: Language) {
-    const [current] = await db
-      .select({ settings: users.settings })
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
+    const current = await prisma.user.findFirst({
+      where: { id: userId },
+      select: { settings: true },
+    });
 
     const currentSettings = (current?.settings as UserSettings | null) ?? {};
     const nextSettings = { ...currentSettings, avatarUrl: null };
 
-    const [updated] = await db
-      .update(users)
-      .set({ settings: nextSettings })
-      .where(eq(users.id, userId))
-      .returning();
-
-    if (!updated) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: getMessage(language, "errors.user.notFound"),
-      });
-    }
-
-    return updated;
+    return updateUserOrThrow(
+      userId,
+      { settings: nextSettings },
+      getMessage(language, "errors.user.notFound"),
+    );
   }
 }
 

@@ -37,9 +37,7 @@ export default function UnauthorizedPage() {
             </div>
           </div>
 
-          <h1 className="text-2xl font-bold text-[var(--ui-text)]">
-            访问受限
-          </h1>
+          <h1 className="text-2xl font-bold text-[var(--ui-text)]">访问受限</h1>
           <p className="mt-3 text-[var(--ui-text-muted)]">
             抱歉，您没有权限访问此页面
           </p>

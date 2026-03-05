@@ -1,4 +1,4 @@
-import { zh, en, type TranslationSchema } from "@acme/i18n";
+import { en, type TranslationSchema, zh } from "@acme/i18n";
 
 export type Language = "zh" | "en";
 

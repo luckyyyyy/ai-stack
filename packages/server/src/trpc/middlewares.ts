@@ -1,6 +1,4 @@
 import { TRPCError } from "@trpc/server";
-import { and, eq, or } from "drizzle-orm";
-import { workspaceMembers, workspaces } from "@/db/schema";
 import { getMessage } from "@/i18n";
 import { protectedProcedure } from "./init";
 
@@ -22,18 +20,11 @@ export const workspaceProtectedProcedure = protectedProcedure.use(
         value,
       );
 
-    const workspaceWhere = isUuid(ctx.workspaceKey)
-      ? or(
-          eq(workspaces.id, ctx.workspaceKey),
-          eq(workspaces.slug, ctx.workspaceKey),
-        )
-      : eq(workspaces.slug, ctx.workspaceKey);
-
-    const [workspace] = await ctx.db
-      .select()
-      .from(workspaces)
-      .where(workspaceWhere)
-      .limit(1);
+    const workspace = await ctx.prisma.workspace.findFirst({
+      where: isUuid(ctx.workspaceKey)
+        ? { OR: [{ id: ctx.workspaceKey }, { slug: ctx.workspaceKey }] }
+        : { slug: ctx.workspaceKey },
+    });
 
     if (!workspace) {
       throw new TRPCError({
@@ -42,16 +33,9 @@ export const workspaceProtectedProcedure = protectedProcedure.use(
       });
     }
 
-    const [membership] = await ctx.db
-      .select()
-      .from(workspaceMembers)
-      .where(
-        and(
-          eq(workspaceMembers.workspaceId, workspace.id),
-          eq(workspaceMembers.userId, ctx.userId),
-        ),
-      )
-      .limit(1);
+    const membership = await ctx.prisma.workspaceMember.findFirst({
+      where: { workspaceId: workspace.id, userId: ctx.userId },
+    });
 
     if (!membership) {
       throw new TRPCError({
